@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  ros-master:
+    image: ros:noetic-ros-core
+    command: stdbuf -o L roscore
+    network_mode: "host"
+    environment:
+      - ROS_HOSTNAME=ubuntu
+      - ROS_MASTER_URI=http://ubuntu:11311
+
+  tortoisebot-ros1-real:
+    build: 
+      context: ros1_bringup
+      dockerfile: ./dockerfile-tortoisebot-ros1-real
+    image: morg1207/morg1207-cp15:tortoisebot-ros1-real
+    container_name: tortoisebot-ros1-real-cont
+    depends_on:
+      - ros-master
+    network_mode: host
+    privileged: true
+    tty: true
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+        # Camara
+      - /dev/video0
+      - /dev/video1
+      - /dev/video2
+      - /dev/video3
+      - /dev/video4
+      - /dev/video5
+
+    environment:
+      - ROS_HOSTNAME=ubuntu
+      - ROS_MASTER_URI=http://ubuntu:11311
+
+  tortoisebot-ros1-slam-real:
+    build:    
+      context: ros1_slam
+      dockerfile: ./dockerfile-tortoisebot-ros1-slam-real
+    image: morg1207/morg1207-cp15:tortoisebot-ros1-slam-real
+    container_name: tortoisebot-ros1-slam-real
+    network_mode: host
+    privileged: true
+
+    environment:
+     - ROS_HOSTNAME=ubuntu
+     - ROS_MASTER_URI=http://ubuntu:11311
+
+    depends_on:
+      - tortoisebot-ros1-real

@@ -1,0 +1,8 @@
+- git:
+    local-name: cartographer_ros
+    uri: 'https://github.com/cartographer-project/cartographer_ros.git'
+    version: 'master'
+- git:
+    local-name: cartographer
+    uri: 'https://github.com/Combuster54/cartographer.git'
+    version: 'master'

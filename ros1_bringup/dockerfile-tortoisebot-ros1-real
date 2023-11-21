@@ -1,0 +1,61 @@
+# Start from ROS base image
+FROM ros:noetic
+
+# Set the working directory
+WORKDIR /
+
+# Make a catkin workspace
+RUN mkdir -p /catkin_ws/src
+
+# Change the default shell to Bash
+SHELL ["/bin/bash", "-c"]
+
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    ros-noetic-urdf \
+    ros-noetic-xacro \
+    ros-noetic-joint-state-publisher \
+    ros-noetic-robot-state-publisher \
+    ros-noetic-compressed-image-transport \
+    ros-noetic-camera-info-manager \
+    ros-noetic-joint-state-publisher-gui \
+    libvmmalloc-dev \
+    libraspberrypi-bin \
+    libraspberrypi-dev \
+    python3-dev \
+    python3-rpi.gpio \
+    && apt autoremove -y && apt autoclean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone Tortoisebot repository
+RUN git clone https://github.com/rigbetellabs/tortoisebot.git /catkin_ws/src/tortoisebot
+
+RUN rm -rf /catkin_ws/src/tortoisebot/raspicam_node/
+
+# Set the working directory
+WORKDIR /catkin_ws
+
+# Build the Catkin workspace
+RUN source /opt/ros/noetic/setup.bash && catkin_make
+
+
+# Instalando camara
+
+RUN apt-get update && apt-get install -y \
+    ros-noetic-realsense2-camera\
+    && rm -rf /var/lib/apt/lists/*
+
+# Reemplazar el archivo bringup.py ya que no se dispone del raspicam
+RUN rm -rf /catkin_ws/src/tortoisebot/tortoisebot_firmware/launch/bringup.launch
+COPY /launch/bringup.launch /catkin_ws/src/tortoisebot/tortoisebot_firmware/launch/
+
+
+# Copy the ROS bringup entrypoint script
+COPY ros_bringup_entrypoint.sh /
+RUN chmod +x /ros_bringup_entrypoint.sh
+# Configure workspace
+RUN echo "source /catkin_ws/devel/setup.bash" >> ~/.bashrc
+
+# Set the entry point to start the ROS launch file
+ENTRYPOINT ["/ros_bringup_entrypoint.sh"]

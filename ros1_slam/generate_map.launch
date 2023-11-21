@@ -1,0 +1,10 @@
+<launch>
+    <!-- Launch the server_bringup launch file from tortoisebot_firmware package -->
+    <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" args="
+          -configuration_directory /catkin_ws/src/tortoisebot/tortoisebot_firmware/config
+          -configuration_basename lidar.lua" output="screen">
+    </node>
+
+    <!-- Map Publishing Node -->
+    <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros" type="cartographer_occupancy_grid_node" args="-resolution 0.01" />
+</launch>
